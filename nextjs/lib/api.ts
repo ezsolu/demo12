@@ -34,7 +34,7 @@ const getCookie = (name: string) => {
   return decodeURIComponent(match.split("=")[1]);
 };
 
-const apiFetch = async (path: string, options: RequestInit = {}) => {
+export const apiFetch = async (path: string, options: RequestInit = {}) => {
   const method = (options.method ?? "GET").toUpperCase();
   const headers = new Headers(options.headers);
 

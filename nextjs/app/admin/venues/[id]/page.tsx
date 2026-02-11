@@ -2,15 +2,18 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { getCurrentUser, logout, type ApiError, type User } from "@/lib/api";
 
-export default function AdminDashboardPage() {
+export default function AdminVenueDetailPage() {
   const router = useRouter();
+  const params = useParams();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [error, setError] = useState("");
+
+  const venueId = Array.isArray(params?.id) ? params?.id[0] : params?.id;
 
   useEffect(() => {
     let active = true;
@@ -59,7 +62,7 @@ export default function AdminDashboardPage() {
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-50 text-sm text-zinc-500">
-        Đang tải dashboard...
+        Đang tải chi tiết venue...
       </div>
     );
   }
@@ -70,20 +73,31 @@ export default function AdminDashboardPage() {
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
-              Admin Dashboard
+              Admin Venues
             </p>
             <h1 className="text-lg font-semibold text-zinc-900">
-              Xin chào {user?.name ?? user?.email ?? "Admin"}
+              Venue #{venueId}
             </h1>
+            <p className="text-sm text-zinc-500">
+              Xin chào {user?.name ?? user?.email ?? "Admin"}
+            </p>
           </div>
-          <button
-            type="button"
-            onClick={handleLogout}
-            disabled={isLoggingOut}
-            className="rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isLoggingOut ? "Đang đăng xuất..." : "Đăng xuất"}
-          </button>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/admin/venues"
+              className="rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100"
+            >
+              Quay lại danh sách
+            </Link>
+            <button
+              type="button"
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              className="rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isLoggingOut ? "Đang đăng xuất..." : "Đăng xuất"}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -94,31 +108,13 @@ export default function AdminDashboardPage() {
           </div>
         ) : null}
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-            <h2 className="text-base font-semibold text-zinc-900">
-              Tổng quan hệ thống
-            </h2>
-            <p className="mt-2 text-sm text-zinc-500">
-              Khu vực này sẽ hiển thị các chỉ số quan trọng của hệ thống.
-            </p>
-          </div>
-          <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-            <h2 className="text-base font-semibold text-zinc-900">
-              Quản lý nhanh
-            </h2>
-            <p className="mt-2 text-sm text-zinc-500">
-              Các thao tác quản trị sẽ được bổ sung tại đây.
-            </p>
-            <div className="mt-4 space-y-2">
-              <Link
-                href="/admin/venues"
-                className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100"
-              >
-                Danh sách venues
-              </Link>
-            </div>
-          </div>
+        <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <h2 className="text-base font-semibold text-zinc-900">
+            Trang chi tiết venue (placeholder)
+          </h2>
+          <p className="mt-2 text-sm text-zinc-500">
+            Trang chi tiết sẽ được triển khai ở task khác.
+          </p>
         </div>
       </main>
     </div>
