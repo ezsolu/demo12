@@ -1,0 +1,64 @@
+services:
+
+    api:
+        build:
+            context: ./laravel
+            dockerfile: Dockerfile
+        container_name: demo12-api
+        restart: unless-stopped
+        ports:
+            - "8000:8000"
+        volumes:
+            - ./laravel:/var/www/html
+        environment:
+            - DB_CONNECTION=mysql
+            - DB_HOST=mysql
+            - DB_PORT=3306
+            - DB_DATABASE=demo12
+            - DB_USERNAME=demo12
+            - DB_PASSWORD=secret
+            - APP_ENV=local
+            - APP_DEBUG=true
+        depends_on:
+            - mysql
+        networks:
+            - app
+
+    mysql:
+        image: mysql:8.0
+        container_name: demo12-mysql
+        restart: unless-stopped
+        environment:
+            - MYSQL_DATABASE=demo12
+            - MYSQL_USER=demo12
+            - MYSQL_PASSWORD=secret
+            - MYSQL_ROOT_PASSWORD=rootsecret
+        ports:
+            - "3306:3306"
+        volumes:
+            - mysql_data:/var/lib/mysql
+        networks:
+            - app
+
+    frontend:
+        image: node:20-alpine
+        working_dir: /app
+        container_name: demo12-frontend
+        command: sh -c "npm install && npm run dev"
+        restart: unless-stopped
+        ports:
+            - "3000:3000"
+        volumes:
+            - ./nextjs:/app
+        environment:
+            - NODE_ENV=development
+            - NEXT_TELEMETRY_DISABLED=1
+        networks:
+            - app
+
+networks:
+    app:
+        driver: bridge
+
+volumes:
+    mysql_data:
