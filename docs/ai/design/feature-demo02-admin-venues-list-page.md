@@ -31,11 +31,11 @@ description: Define the technical architecture, components, and data models
 - Core entities and their relationships
   - `venues` belongs to `cities` and `venue_types`
 - Data schemas/structures
-  - `venues`: id, name, address, coordinates (POINT, SRID 4326), seat_count, people_count, rating, rating_count, price_level, city_id, venue_type_id, timestamps
+  - `venues`: id, name, address, latitude, longitude, seat_count, people_count, rating, rating_count, price_level, city_id, venue_type_id, timestamps
   - `cities`: id, name, timestamps
   - `venue_types`: id, name, timestamps
 - Data flow between components
-  - API loads venues with city/type data (coordinates included in API response; UI does not display them)
+  - API loads venues with city/type data (latitude/longitude included in API response; UI does not display them)
 
 ## API Design
 **How do components communicate?**
@@ -50,7 +50,7 @@ description: Define the technical architecture, components, and data models
     - `draw`: echo of the request `draw`
     - `recordsTotal`: total rows before filtering
     - `recordsFiltered`: total rows after filtering
-    - `data`: array of venues with city/type names (coordinates included)
+    - `data`: array of venues with city/type names (latitude/longitude included)
 - Authentication/authorization approach
   - Public endpoint (no auth) as per requirement
 

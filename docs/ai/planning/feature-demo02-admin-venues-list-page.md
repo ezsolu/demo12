@@ -20,7 +20,7 @@ description: Break down work into actionable tasks and estimate timeline
 ### Phase 1: Foundation
 - [x] Task 1.1: Confirm admin routing structure and navigation entry
 - [x] Task 1.2: Define API response shape and pagination contract
-- [ ] Task 1.3: Prepare seed data/factories for venues, cities, types
+- [x] Task 1.3: Prepare seed data/factories for venues, cities, types
 
 ### Phase 2: Core Features
 - [x] Task 2.1: Implement `GET /api/venues` with filters and pagination
@@ -31,8 +31,8 @@ description: Break down work into actionable tasks and estimate timeline
 ### Phase 3: Integration & Polish
 - [x] Task 3.1: Add loading/empty/error states in UI
 - [x] Task 3.2: Add input validation and safe defaults for filters
-- [ ] Task 3.3: Add index hints or query optimizations if needed
-- [ ] Task 3.4: Write unit and integration tests (in progress: frontend test added)
+- [x] Task 3.3: Add index hints or query optimizations if needed (notes documented)
+- [ ] Task 3.4: Write unit and integration tests (in progress: frontend + backend tests added)
 
 ## Dependencies
 **What needs to happen in what order?**

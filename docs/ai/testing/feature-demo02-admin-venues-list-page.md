@@ -63,7 +63,7 @@ description: Define testing approach, test cases, and quality assurance
 - Coverage gaps (files/functions below 100% and rationale)
 - Links to test reports or dashboards
 - Manual testing outcomes and sign-off
-- Current status: Frontend unit test added; backend and integration tests pending
+- Current status: Frontend unit test added; backend feature test added; integration tests pending
 
 ## Manual Testing
 **What requires human validation?**

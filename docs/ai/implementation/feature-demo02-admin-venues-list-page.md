@@ -37,7 +37,7 @@ description: Technical implementation notes, patterns, and code guidelines
 - Feature 1: List API supports DataTables server-side params plus filters (`name`, `venue_type`, `city`, `price_level`, optional `venue_type_id`, `city_id`)
 - Feature 2: DataTables uses server-side pagination and handles loading/empty states
 - Feature 3: Row click navigates to `admin/venues/{id}` (placeholder)
-- Feature 4: Coordinates are excluded from the list UI
+- Feature 4: Latitude/longitude are returned by the API but excluded from the list UI
 
 ### Current Status
 - Backend API implemented under `Modules/Venue` with request validation and query service
@@ -85,6 +85,13 @@ description: Technical implementation notes, patterns, and code guidelines
   - Add indexes on `city_id`, `venue_type_id`, `price_level`
 - Resource management
   - Always use pagination with `per_page=50`
+
+### Optimization Candidates
+- Add indexes on `venues.city_id`, `venues.venue_type_id`, `venues.price_level`, and optionally `venues.name` for faster filtering
+- Consider a composite index `(city_id, venue_type_id, price_level)` if filters are often combined
+- Add indexes on `cities.name` and `venue_types.name` if text filters become slow
+- Ensure count queries use `count(distinct venues.id)` after joins to avoid duplicates
+- Cache list results for common filter combinations if response time degrades
 
 ## Security Notes
 **What security measures are in place?**

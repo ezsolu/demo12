@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('address');
-            $table->geography('coordinates', subtype: 'POINT', srid: 4326);
+            $table->decimal('latitude', 10, 8);
+            $table->decimal('longitude', 11, 8);
             $table->unsignedMediumInteger('seat_count')->default(0);
             $table->unsignedMediumInteger('people_count')->default(0);
             $table->decimal('rating', 3, 1)->default(5);
@@ -24,6 +25,8 @@ return new class extends Migration
             $table->mediumInteger('city_id')->index();
             $table->tinyInteger('venue_type_id')->index();
             $table->timestamps();
+
+            $table->index(['latitude', 'longitude']);
         });
     }
 

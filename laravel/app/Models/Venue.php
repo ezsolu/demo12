@@ -8,7 +8,8 @@ class Venue extends Model
     protected $fillable = [
         'name',
         'address',
-        'coordinates',
+        'latitude',
+        'longitude',
         'seat_count',
         'people_count',
         'rating',
