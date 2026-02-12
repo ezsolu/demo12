@@ -17,8 +17,8 @@ COPY . .
 
 RUN composer install --no-dev --optimize-autoloader 2>/dev/null || true
 
-RUN usermod -u 1001 www-data &&\
-    groupmod -g 1001 www-data &&\
+RUN usermod -u 1000 www-data &&\
+    groupmod -g 1000 www-data &&\
     chown -R www-data:www-data /var/www/html
 
 EXPOSE 8000

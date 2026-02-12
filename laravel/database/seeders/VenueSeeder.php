@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\City;
+use App\Models\Venue;
 use App\Models\VenueType;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
@@ -15,6 +16,8 @@ class VenueSeeder extends Seeder
      */
     public function run(): void
     {
+        Venue::truncate();
+
         $cityIds = City::query()->pluck('id')->all();
         $venueTypeIds = VenueType::query()->pluck('id')->all();
 

@@ -13,6 +13,7 @@ class VenueTypeSeeder extends Seeder
      */
     public function run(): void
     {
+        VenueType::truncate();
         VenueType::insert([
             ['name' => 'Ballroom'],
             ['name' => 'Function Venue'],

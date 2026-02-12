@@ -13,6 +13,8 @@ class CitySeeder extends Seeder
      */
     public function run(): void
     {
+        City::truncate();
+
         City::insert([
             ['name' => 'Sydney CBD'],
             ['name' => 'Melbourne'],
