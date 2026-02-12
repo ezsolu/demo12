@@ -30,6 +30,7 @@ class VenueListService
         $data = (clone $baseQuery)
             ->select([
                 'venues.id',
+                'venues.status',
                 'venues.name',
                 'venues.address',
                 'venues.latitude',
@@ -49,6 +50,7 @@ class VenueListService
             ->map(static function ($row) {
                 return [
                     'id' => (int) $row->id,
+                    'status' => Venue::statusLabel((int) $row->status),
                     'name' => $row->name,
                     'address' => $row->address,
                     'latitude' => $row->latitude !== null ? (float) $row->latitude : null,
@@ -82,6 +84,7 @@ class VenueListService
         $cityId = $params['city_id'] ?? null;
         $city = $params['city'] ?? null;
         $priceLevel = $params['price_level'] ?? null;
+        $status = $params['status'] ?? 'show';
 
         if ($searchValue) {
             $query->where('venues.name', 'like', '%' . $searchValue . '%');
@@ -109,6 +112,10 @@ class VenueListService
 
         if ($priceLevel !== null && $priceLevel !== '') {
             $query->where('venues.price_level', (int) $priceLevel);
+        }
+
+        if ($status !== 'all') {
+            $query->where('venues.status', Venue::statusValue((string) $status));
         }
     }
 

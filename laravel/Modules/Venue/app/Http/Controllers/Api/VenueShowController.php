@@ -19,6 +19,7 @@ class VenueShowController extends Controller
     {
         return [
             'id' => (int) $venue->id,
+            'status' => Venue::statusLabel((int) $venue->status),
             'name' => $venue->name,
             'address' => $venue->address,
             'latitude' => $venue->latitude !== null ? (float) $venue->latitude : null,

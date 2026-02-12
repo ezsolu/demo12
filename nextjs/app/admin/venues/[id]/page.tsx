@@ -14,6 +14,7 @@ import {
 
 type VenuePayload = {
   id: number;
+  status: "show" | "hide";
   name: string;
   address: string;
   latitude: number | null;
@@ -28,6 +29,7 @@ type VenuePayload = {
 };
 
 type VenueForm = {
+  status: "show" | "hide";
   name: string;
   address: string;
   latitude: string;
@@ -66,6 +68,7 @@ const toOptionalInt = (value: string) => {
 };
 
 const toFormState = (venue: VenuePayload): VenueForm => ({
+  status: venue.status,
   name: toFormValue(venue.name),
   address: toFormValue(venue.address),
   latitude: toFormValue(venue.latitude),
@@ -106,6 +109,9 @@ export default function AdminVenueDetailPage() {
   const [loadError, setLoadError] = useState("");
   const [saveError, setSaveError] = useState("");
   const [saveSuccess, setSaveSuccess] = useState("");
+  const [deleteError, setDeleteError] = useState("");
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const venueId = Array.isArray(params?.id) ? params?.id[0] : params?.id;
 
@@ -227,6 +233,7 @@ export default function AdminVenueDetailPage() {
   const handleEdit = () => {
     setSaveError("");
     setSaveSuccess("");
+    setDeleteError("");
     setIsEditing(true);
   };
 
@@ -243,6 +250,7 @@ export default function AdminVenueDetailPage() {
       await getCsrfCookie();
 
       const payload = {
+        status: venueForm.status,
         name: venueForm.name.trim(),
         address: venueForm.address.trim(),
         latitude: toOptionalFloat(venueForm.latitude),
@@ -284,6 +292,54 @@ export default function AdminVenueDetailPage() {
       );
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleDeleteClick = () => {
+    setDeleteError("");
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteCancel = () => {
+    if (isDeleting) {
+      return;
+    }
+    setIsDeleteDialogOpen(false);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!venueId) {
+      return;
+    }
+
+    setDeleteError("");
+    setIsDeleting(true);
+
+    try {
+      await getCsrfCookie();
+      const response = await apiFetch(`/api/v1/venues/${venueId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const fallback =
+          response.status === 403
+            ? "Bạn không có quyền xóa venue này."
+            : response.status === 404
+              ? "Venue không tồn tại hoặc đã bị xóa."
+              : "Không thể xóa venue. Vui lòng thử lại.";
+        const message = await parseErrorMessage(response, fallback);
+        throw new Error(message);
+      }
+
+      router.push("/admin/venues?deleted=1");
+    } catch (err) {
+      setDeleteError(
+        err instanceof Error ? err.message : "Không thể xóa venue.",
+      );
+      setIsDeleteDialogOpen(false);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -352,6 +408,14 @@ export default function AdminVenueDetailPage() {
               </p>
             </div>
             <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleDeleteClick}
+                disabled={!venueForm || isDeleting}
+                className="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isDeleting ? "Đang xóa..." : "Xóa venue"}
+              </button>
               {!isEditing ? (
                 <button
                   type="button"
@@ -384,8 +448,32 @@ export default function AdminVenueDetailPage() {
               {saveSuccess}
             </div>
           ) : null}
+          {deleteError ? (
+            <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {deleteError}
+            </div>
+          ) : null}
 
           <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <label
+                htmlFor="venue-status"
+                className="text-sm font-medium text-zinc-700"
+              >
+                Trạng thái
+              </label>
+              <select
+                id="venue-status"
+                value={venueForm?.status ?? "show"}
+                onChange={handleFieldChange("status")}
+                disabled={!isEditing}
+                required
+                className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-200 disabled:bg-zinc-100"
+              >
+                <option value="show">Hiển thị</option>
+                <option value="hide">Ẩn</option>
+              </select>
+            </div>
             <div className="space-y-2">
               <label
                 htmlFor="venue-name"
@@ -605,6 +693,38 @@ export default function AdminVenueDetailPage() {
           </div>
         </div>
       </main>
+
+      {isDeleteDialogOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-lg">
+            <h3 className="text-base font-semibold text-zinc-900">
+              Xác nhận xóa venue
+            </h3>
+            <p className="mt-2 text-sm text-zinc-600">
+              Bạn có chắc chắn muốn xóa venue này không? Hành động này không thể
+              hoàn tác.
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={handleDeleteCancel}
+                disabled={isDeleting}
+                className="rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Hủy
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteConfirm}
+                disabled={isDeleting}
+                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isDeleting ? "Đang xóa..." : "Xác nhận"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

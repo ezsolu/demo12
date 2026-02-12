@@ -30,6 +30,7 @@ class VenueListApiTest extends TestCase
     private function createVenue(array $overrides = []): Venue
     {
         return Venue::query()->create(array_merge([
+            'status' => Venue::STATUS_SHOW,
             'name' => 'Venue A',
             'address' => '123 Main Street',
             'latitude' => -33.865143,
@@ -64,6 +65,7 @@ class VenueListApiTest extends TestCase
                 'data' => [
                     '*' => [
                         'id',
+                        'status',
                         'name',
                         'address',
                         'latitude',
@@ -135,5 +137,56 @@ class VenueListApiTest extends TestCase
         $response
             ->assertStatus(422)
             ->assertJsonValidationErrors(['price_level']);
+    }
+
+    public function test_list_defaults_to_show_status(): void
+    {
+        $this->createVenue([
+            'name' => 'Visible Venue',
+            'status' => Venue::STATUS_SHOW,
+        ]);
+        $this->createVenue([
+            'name' => 'Hidden Venue',
+            'status' => Venue::STATUS_HIDE,
+        ]);
+
+        $response = $this->getJson('/api/v1/venues');
+
+        $response
+            ->assertOk()
+            ->assertJsonPath('recordsFiltered', 1);
+
+        $data = $response->json('data');
+        $this->assertCount(1, $data);
+        $this->assertSame('Visible Venue', $data[0]['name']);
+        $this->assertSame('show', $data[0]['status']);
+    }
+
+    public function test_list_can_filter_hide_and_all_status(): void
+    {
+        $this->createVenue([
+            'name' => 'Visible Venue',
+            'status' => Venue::STATUS_SHOW,
+        ]);
+        $this->createVenue([
+            'name' => 'Hidden Venue',
+            'status' => Venue::STATUS_HIDE,
+        ]);
+
+        $hideResponse = $this->getJson('/api/v1/venues?status=hide');
+        $hideResponse
+            ->assertOk()
+            ->assertJsonPath('recordsFiltered', 1);
+        $hideData = $hideResponse->json('data');
+        $this->assertCount(1, $hideData);
+        $this->assertSame('Hidden Venue', $hideData[0]['name']);
+        $this->assertSame('hide', $hideData[0]['status']);
+
+        $allResponse = $this->getJson('/api/v1/venues?status=all');
+        $allResponse
+            ->assertOk()
+            ->assertJsonPath('recordsFiltered', 2);
+        $allData = $allResponse->json('data');
+        $this->assertCount(2, $allData);
     }
 }

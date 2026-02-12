@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('venues', function (Blueprint $table) {
             $table->id();
+            $table->unsignedTinyInteger('status')->default(1);
             $table->string('name');
             $table->string('address');
             $table->decimal('latitude', 10, 8);
@@ -22,6 +23,8 @@ return new class extends Migration
             $table->decimal('rating', 3, 1)->default(5);
             $table->unsignedInteger('rating_count')->default(0);
             $table->unsignedTinyInteger('price_level')->default(2);
+            $table->mediumInteger('rental_price')->default(0);
+            $table->unsignedTinyInteger('rental_status')->default(1);
             $table->mediumInteger('city_id')->index();
             $table->tinyInteger('venue_type_id')->index();
             $table->timestamps();

@@ -11,6 +11,9 @@ jest.mock("next/navigation", () => ({
     replace: mockReplace,
     push: mockPush,
   }),
+  useSearchParams: () => ({
+    get: () => null,
+  }),
 }));
 
 jest.mock("datatables.net-dt", () => ({}));

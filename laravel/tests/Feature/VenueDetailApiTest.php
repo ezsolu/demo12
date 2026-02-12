@@ -29,6 +29,7 @@ class VenueDetailApiTest extends TestCase
     private function createVenue(array $overrides = []): Venue
     {
         return Venue::query()->create(array_merge([
+            'status' => Venue::STATUS_SHOW,
             'name' => 'Venue A',
             'address' => '123 Main Street',
             'latitude' => -33.865143,
@@ -52,6 +53,7 @@ class VenueDetailApiTest extends TestCase
         $response
             ->assertOk()
             ->assertJsonPath('data.id', $venue->id)
+            ->assertJsonPath('data.status', 'show')
             ->assertJsonPath('data.name', 'Venue Detail')
             ->assertJsonPath('data.city_id', $this->city->id)
             ->assertJsonPath('data.venue_type_id', $this->venueType->id);
@@ -66,6 +68,7 @@ class VenueDetailApiTest extends TestCase
 
         $response = $this->putJson("/api/v1/venues/{$venue->id}", [
             'name' => 'Updated Venue',
+            'status' => 'hide',
             'address' => '456 New Street',
             'latitude' => -33.86,
             'longitude' => 151.2,
@@ -92,6 +95,7 @@ class VenueDetailApiTest extends TestCase
 
         $response = $this->putJson("/api/v1/venues/{$venue->id}", [
             'name' => 'Updated Venue',
+            'status' => 'hide',
             'address' => '456 New Street',
             'latitude' => -33.86,
             'longitude' => 151.2,
@@ -106,11 +110,13 @@ class VenueDetailApiTest extends TestCase
 
         $response
             ->assertOk()
+            ->assertJsonPath('data.status', 'hide')
             ->assertJsonPath('data.name', 'Updated Venue')
             ->assertJsonPath('data.price_level', 3);
 
         $this->assertDatabaseHas('venues', [
             'id' => $venue->id,
+            'status' => Venue::STATUS_HIDE,
             'name' => 'Updated Venue',
             'address' => '456 New Street',
             'price_level' => 3,
@@ -153,5 +159,40 @@ class VenueDetailApiTest extends TestCase
                     '*' => ['id', 'name'],
                 ],
             ]);
+    }
+
+    public function test_delete_requires_admin_user(): void
+    {
+        $user = User::factory()->create();
+        $venue = $this->createVenue();
+
+        Sanctum::actingAs($user);
+
+        $this->deleteJson("/api/v1/venues/{$venue->id}")
+            ->assertStatus(403);
+    }
+
+    public function test_admin_can_delete_venue(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $venue = $this->createVenue();
+
+        Sanctum::actingAs($admin);
+
+        $this->deleteJson("/api/v1/venues/{$venue->id}")
+            ->assertNoContent();
+
+        $this->assertDatabaseMissing('venues', [
+            'id' => $venue->id,
+        ]);
+    }
+
+    public function test_delete_returns_not_found_when_venue_missing(): void
+    {
+        $admin = User::factory()->admin()->create();
+        Sanctum::actingAs($admin);
+
+        $this->deleteJson('/api/v1/venues/999999')
+            ->assertNotFound();
     }
 }

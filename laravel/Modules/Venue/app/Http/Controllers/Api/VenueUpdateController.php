@@ -13,6 +13,7 @@ class VenueUpdateController extends Controller
     public function __invoke(VenueUpdateRequest $request, Venue $venue): JsonResponse
     {
         $validated = $request->validated();
+        $validated['status'] = Venue::statusValue((string) $validated['status']);
 
         $venue->update($validated);
 
@@ -31,6 +32,7 @@ class VenueUpdateController extends Controller
     {
         return [
             'id' => (int) $venue->id,
+            'status' => Venue::statusLabel((int) $venue->status),
             'name' => $venue->name,
             'address' => $venue->address,
             'latitude' => $venue->latitude !== null ? (float) $venue->latitude : null,

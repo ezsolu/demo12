@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import DataTable from "datatables.net-react";
 import DT from "datatables.net-dt";
 import "datatables.net-dt/css/dataTables.dataTables.css";
@@ -33,10 +33,12 @@ const DEFAULT_FILTERS = {
   venueType: "",
   city: "",
   priceLevel: "",
+  status: "all",
 };
 
 export default function AdminVenuesListPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const tableRef = useRef<any>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -173,10 +175,15 @@ export default function AdminVenuesListPage() {
             {listError}
           </div>
         ) : null}
+        {searchParams.get("deleted") === "1" ? (
+          <div className="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+            Xóa venue thành công.
+          </div>
+        ) : null}
 
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
           <form onSubmit={handleFilterSubmit} className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-4">
+            <div className="grid gap-4 md:grid-cols-5">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-zinc-700">
                   Tên venue
@@ -244,6 +251,25 @@ export default function AdminVenuesListPage() {
                   placeholder="0-5"
                 />
               </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-zinc-700">
+                  Trạng thái
+                </label>
+                <select
+                  value={filters.status}
+                  onChange={(event) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      status: event.target.value,
+                    }))
+                  }
+                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-200"
+                >
+                  <option value="all">Tất cả</option>
+                  <option value="show">Hiển thị</option>
+                  <option value="hide">Ẩn</option>
+                </select>
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <button
@@ -297,6 +323,7 @@ export default function AdminVenuesListPage() {
                 if (filters.priceLevel) {
                   params.set("price_level", filters.priceLevel);
                 }
+                params.set("status", filters.status);
 
                 const response = await apiFetch(`/api/v1/venues?${params}`);
                 if (!response.ok) {

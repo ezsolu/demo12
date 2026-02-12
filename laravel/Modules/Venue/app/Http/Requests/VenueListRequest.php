@@ -25,6 +25,7 @@ class VenueListRequest extends FormRequest
             'city_id' => ['nullable', 'integer', 'exists:cities,id'],
             'city' => ['nullable', 'string', 'max:255'],
             'price_level' => ['nullable', 'integer', 'min:0', 'max:5'],
+            'status' => ['nullable', 'string', 'in:show,hide,all'],
         ];
     }
 }
